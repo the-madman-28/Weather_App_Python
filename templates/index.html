@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Weather Voice Assistant</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        input {
+            padding: 12px;
+            width: 70%;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .weather {
+            margin-top: 30px;
+            padding: 20px;
+            background: #1f2937;
+            border-radius: 12px;
+        }
+
+        .error {
+            color: #fca5a5;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Weather Voice Assistant</h1>
+
+    <form method="POST">
+        <input
+            type="text"
+            name="place"
+            placeholder="Enter place name"
+            required
+        >
+
+        <button type="submit">
+            Get Weather
+        </button>
+    </form>
+
+    {% if weather %}
+
+        <div class="weather">
+
+            <h2>
+                {{ weather.place }},
+                {{ weather.country }}
+            </h2>
+
+            <p>
+                Temperature:
+                {{ weather.temp }} °C
+            </p>
+
+            <p>
+                Condition:
+                {{ weather.condition }}
+            </p>
+
+        </div>
+
+        <script>
+            const message =
+                "Current temperature in " +
+                {{ weather.place | tojson }} +
+                " is " +
+                {{ weather.temp | tojson }} +
+                " degree Celsius. " +
+                "Weather condition is " +
+                {{ weather.condition | tojson }} +
+                ". Thank you.";
+
+            const speech =
+                new SpeechSynthesisUtterance(message);
+
+            window.speechSynthesis.speak(speech);
+        </script>
+
+    {% endif %}
+
+    {% if error %}
+        <p class="error">
+            {{ error }}
+        </p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
