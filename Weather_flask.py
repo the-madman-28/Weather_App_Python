@@ -11,7 +11,7 @@ def home():
 
     if request.method == "POST":
         place = request.form.get("place", "").strip()
-        api_key = os.getenv("WEATHER_API_KEY")
+        api_key = os.getenv("f46e7a65af84410a8ab174512242701")
 
         if not place:
             error = "Please enter a place name."
