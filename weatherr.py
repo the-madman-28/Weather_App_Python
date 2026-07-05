@@ -1,4 +1,4 @@
-import requests
+'''import requests
 import json
 import win32com.client as wincom
 
@@ -16,3 +16,5 @@ a=dec["current"]["temp_c"]
 print(f"Current emperture in {place} is {a} degree celcius. \nThank you")
 text = f"current emperture in {place} is {a} degree celcius. \nThank you"
 speak.Speak(text)
+
+'''
