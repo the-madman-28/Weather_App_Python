@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Weather Voice Assistant</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #111827,
+                    #1e3a5f
+                );
+
+            color: white;
+        }
+
+
+        .container {
+
+            width: 100%;
+
+            max-width: 520px;
+
+            padding: 35px;
+
+            background:
+                rgba(31, 41, 55, 0.95);
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.35);
+
+            text-align: center;
+        }
+
+
+        h1 {
+
+            margin-top: 0;
+
+            margin-bottom: 10px;
+        }
+
+
+        .subtitle {
+
+            color: #cbd5e1;
+
+            margin-bottom: 30px;
+        }
+
+
+        form {
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+
+        input {
+
+            flex: 1;
+
+            padding: 13px 15px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            outline: none;
+
+            font-size: 15px;
+        }
+
+
+        input:focus {
+
+            box-shadow:
+                0 0 0 2px #60a5fa;
+        }
+
+
+        button {
+
+            padding: 13px 18px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        button:hover {
+
+            background: #1d4ed8;
+        }
+
+
+        .weather {
+
+            margin-top: 30px;
+
+            padding: 25px;
+
+            background: #111827;
+
+            border-radius: 14px;
+
+            border: 1px solid #374151;
+        }
+
+
+        .weather h2 {
+
+            margin-top: 0;
+
+            margin-bottom: 20px;
+        }
+
+
+        .temperature {
+
+            font-size: 38px;
+
+            font-weight: bold;
+
+            margin: 10px 0;
+        }
+
+
+        .condition {
+
+            color: #cbd5e1;
+
+            font-size: 18px;
+        }
+
+
+        .speak-button {
+
+            margin-top: 20px;
+
+            background: #059669;
+        }
+
+
+        .speak-button:hover {
+
+            background: #047857;
+        }
+
+
+        .error {
+
+            margin-top: 20px;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            background: #450a0a;
+
+            color: #fecaca;
+        }
+
+
+        .hidden {
+
+            display: none;
+        }
+
+
+        @media (max-width: 500px) {
+
+            .container {
+
+                margin: 20px;
+
+                padding: 25px;
+            }
+
+
+            form {
+
+                flex-direction: column;
+            }
+
+
+            button {
+
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <h1>
+        Weather Voice Assistant
+    </h1>
+
+
+    <p class="subtitle">
+        Enter a place to get the current weather.
+    </p>
+
+
+    <form id="weatherForm">
+
+
+        <input
+            type="text"
+            id="place"
+            placeholder="Enter place name"
+            required
+        >
+
+
+        <button type="submit">
+            Get Weather
+        </button>
+
+
+    </form>
+
+
+    <!-- Error -->
+
+    <div
+        id="error"
+        class="error hidden"
+    ></div>
+
+
+    <!-- Weather -->
+
+    <div
+        id="weather"
+        class="weather hidden"
+    >
+
+        <h2 id="location"></h2>
+
+
+        <div
+            id="temperature"
+            class="temperature"
+        ></div>
+
+
+        <div
+            id="condition"
+            class="condition"
+        ></div>
+
+
+        <button
+            type="button"
+            id="speakButton"
+            class="speak-button"
+        >
+            🔊 Speak Weather
+        </button>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+    const form =
+        document.getElementById("weatherForm");
+
+
+    const placeInput =
+        document.getElementById("place");
+
+
+    const weatherBox =
+        document.getElementById("weather");
+
+
+    const errorBox =
+        document.getElementById("error");
+
+
+    const locationText =
+        document.getElementById("location");
+
+
+    const temperatureText =
+        document.getElementById("temperature");
+
+
+    const conditionText =
+        document.getElementById("condition");
+
+
+    const speakButton =
+        document.getElementById("speakButton");
+
+
+    let weatherMessage = "";
+
+
+    /*
+        Get Weather
+    */
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const place =
+                placeInput.value.trim();
+
+
+            if (!place) {
+
+                showError(
+                    "Please enter a place name."
+                );
+
+                return;
+            }
+
+
+            hideError();
+
+            weatherBox.classList.add(
+                "hidden"
+            );
+
+
+            try {
+
+
+                const formData =
+                    new FormData();
+
+
+                formData.append(
+                    "place",
+                    place
+                );
+
+
+                const response =
+                    await fetch(
+                        "/weather",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data.success) {
+
+                    showError(
+                        data.error
+                    );
+
+                    return;
+                }
+
+
+                displayWeather(
+                    data.weather
+                );
+
+
+            }
+            catch (error) {
+
+                showError(
+                    "Unable to connect to the server."
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+        Display Weather
+    */
+
+    function displayWeather(weather) {
+
+
+        locationText.textContent =
+            weather.place +
+            ", " +
+            weather.country;
+
+
+        temperatureText.textContent =
+            weather.temp +
+            " °C";
+
+
+        conditionText.textContent =
+            weather.condition;
+
+
+        weatherMessage =
+            "Current temperature in " +
+            weather.place +
+            " is " +
+            weather.temp +
+            " degrees Celsius. " +
+            "Weather condition is " +
+            weather.condition +
+            ".";
+
+
+        weatherBox.classList.remove(
+            "hidden"
+        );
+
+
+        // Automatically speak
+
+        speakWeather();
+
+    }
+
+
+    /*
+        Speak Weather
+    */
+
+    function speakWeather() {
+
+
+        if (
+            !("speechSynthesis" in window)
+        ) {
+
+            alert(
+                "Text-to-speech is not supported by your browser."
+            );
+
+            return;
+        }
+
+
+        window.speechSynthesis.cancel();
+
+
+        const speech =
+            new SpeechSynthesisUtterance(
+                weatherMessage
+            );
+
+
+        speech.lang = "en-US";
+
+        speech.rate = 1;
+
+        speech.pitch = 1;
+
+
+        window.speechSynthesis.speak(
+            speech
+        );
+
+    }
+
+
+    /*
+        Speak button
+    */
+
+    speakButton.addEventListener(
+        "click",
+        speakWeather
+    );
+
+
+    /*
+        Show error
+    */
+
+    function showError(message) {
+
+        errorBox.textContent =
+            message;
+
+        errorBox.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    /*
+        Hide error
+    */
+
+    function hideError() {
+
+        errorBox.textContent = "";
+
+        errorBox.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+</script>
+
+
+</body>
+
+</html>
